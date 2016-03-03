@@ -10,7 +10,7 @@ source.connect(gainNode);
 gainNode.connect(audioCtx.destination);
 
 var HEIGHT = window.innerHeight;
-var BAR_COUNT = 40;
+var BAR_COUNT = 128;
 var FREQUENCY_MULT = 3;
 
 var quadArray = [];
@@ -60,10 +60,14 @@ function timerFunction() {
 	frequencyData = new Uint8Array(analyser.frequencyBinCount);
     analyser.getByteFrequencyData(frequencyData);
 
+    var averageFreq = frequencyData[0];
+
     // Shift all of the colors over by one
     var updateCount;
     for (updateCount = BAR_COUNT - 1; updateCount > 0; updateCount--) {
     	var frequencyValue = frequencyData[updateCount] * FREQUENCY_MULT;
+
+    	averageFreq += frequencyData[updateCount];
 
     	for (curQuad = 0; curQuad < 4; curQuad++) {
     		barArrays[curQuad][updateCount].fill.style.flex = frequencyValue;
@@ -72,8 +76,17 @@ function timerFunction() {
     	}
     }
 
-    // Introduce a new color
-	var newColor = '#000000'.replace(/0/g,function(){return (~~(Math.random()*16)).toString(16);});
+    // console.log(averageFreq / BAR_COUNT)
+
+    // Introduce new color based on average intensity
+    var newColor;
+    if (averageFreq > 189 * BAR_COUNT) {
+    	newColor = '#ffc952';
+    } else if (averageFreq > 168 * BAR_COUNT) {
+    	newColor = '#47b8e0'
+    } else {
+    	newColor = '#34314c';
+    }
 
 	for (curQuad = 0; curQuad < 4; curQuad++) {
 		barArrays[curQuad][0].fill.style.flex = frequencyValue;
